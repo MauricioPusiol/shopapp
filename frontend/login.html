@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopApp — Ingresar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #0f0f0f;
+      --white:   #fafaf8;
+      --gray-1:  #f4f3f0;
+      --gray-2:  #e8e6e1;
+      --gray-3:  #b0ada6;
+      --gray-4:  #6b6860;
+      --accent:  #0f0f0f;
+      --error:   #c0392b;
+      --success: #1a7a4a;
+      --radius:  2px;
+      --transition: 200ms ease;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--black);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Panel izquierdo decorativo */
+    .panel-left {
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 360px; height: 360px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+
+    .panel-left::after {
+      content: '';
+      position: absolute;
+      bottom: -120px; left: -60px;
+      width: 440px; height: 440px;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+
+    .brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+
+    .panel-quote {
+      z-index: 1;
+    }
+
+    .panel-quote blockquote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 36px;
+      line-height: 1.2;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    .panel-quote cite {
+      font-size: 13px;
+      color: var(--gray-3);
+      font-style: normal;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .panel-dots {
+      display: flex;
+      gap: 6px;
+      z-index: 1;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+    }
+    .dot.active { background: var(--white); }
+
+    /* Panel derecho — formulario */
+    .panel-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .auth-header {
+      margin-bottom: 40px;
+    }
+
+    .auth-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .auth-header p {
+      font-size: 14px;
+      color: var(--gray-4);
+      font-weight: 300;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-2);
+      margin-bottom: 32px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 12px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gray-3);
+      cursor: pointer;
+      position: relative;
+      transition: color var(--transition);
+    }
+
+    .tab-btn.active {
+      color: var(--black);
+      font-weight: 500;
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 1.5px;
+      background: var(--black);
+    }
+
+    /* Formulario */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: var(--gray-1);
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: var(--black);
+      outline: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .field input:focus {
+      background: var(--white);
+      border-color: var(--black);
+    }
+
+    .field input::placeholder { color: var(--gray-3); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit:hover { opacity: 0.85; }
+    .btn-submit:active { opacity: 0.7; }
+
+    .btn-submit.loading { pointer-events: none; opacity: 0.6; }
+
+    /* Mensajes */
+    .msg {
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .msg.error   { background: #fdf0ee; color: var(--error); border: 1px solid #f5c6c0; display: block; }
+    .msg.success { background: #edf7f2; color: var(--success); border: 1px solid #b8e4cc; display: block; }
+
+    .form-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-3);
+    }
+
+    .form-footer a {
+      color: var(--black);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 720px) {
+      body { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .panel-right { padding: 32px 24px; align-items: flex-start; padding-top: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="panel-left">
+    <div class="brand">ShopApp</div>
+    <div class="panel-quote">
+      <blockquote>Lo que buscás,<br>donde tenés<br>que estar.</blockquote>
+      <cite>Catálogo · Carrito · Historial</cite>
+    </div>
+    <div class="panel-dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="auth-box">
+
+      <div class="auth-header">
+        <h1>Bienvenido</h1>
+        <p>Ingresá a tu cuenta o creá una nueva.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Ingresar</button>
+        <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="form-panel active" id="panel-login">
+        <div class="msg" id="login-msg"></div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-submit" id="btn-login" onclick="handleLogin()">Ingresar</button>
+        <div class="form-footer">
+          ¿No tenés cuenta? <a onclick="switchTab('register')">Registrate gratis</a>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="form-panel" id="panel-register">
+        <div class="msg" id="register-msg"></div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <button class="btn-submit" id="btn-register" onclick="handleRegister()">Crear cuenta</button>
+        <div class="form-footer">
+          ¿Ya tenés cuenta? <a onclick="switchTab('login')">Ingresá</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+      });
+      document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+      document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    }
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = `msg ${type}`;
+    }
+
+    async function handleLogin() {
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn      = document.getElementById('btn-login');
+
+      if (!email || !password) return showMsg('login-msg', 'Completá todos los campos.', 'error');
+
+      btn.classList.add('loading');
+      btn.textContent = 'Ingresando...';
+
+      try {
+        await login(email, password);
+        showMsg('login-msg', 'Ingreso exitoso. Redirigiendo...', 'success');
+        setTimeout(() => window.location.href = '/index.html', 800);
+      } catch (err) {
+        showMsg('login-msg', err.message, 'error');
+      } finally {
+        btn.classList.remove('loading');
+        btn.textContent = 'Ingresar';
+      }
+    }
+
+    async function handleRegister() {
+      const email    = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const btn      = document.getElementById('btn-register');
+
+      if (!email || !password) return showMsg('register-msg', 'Completá todos los campos.', 'error');
+      if (password.length < 6)  return showMsg('register-msg', 'La contraseña debe tener al menos 6 caracteres.', 'error');
+
+      btn.classList.add('loading');
+      btn.textContent = 'Creando cuenta...';
+
+      try {
+        await register(email, password);
+        showMsg('register-msg', 'Cuenta creada. Podés ingresar ahora.', 'success');
+        setTimeout(() => switchTab('login'), 1200);
+      } catch (err) {
+        showMsg('register-msg', err.message, 'error');
+      } finally {
+        btn.classList.remove('loading');
+        btn.textContent = 'Crear cuenta';
+      }
+    }
+
+    // Enter para enviar
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      const loginActive = document.getElementById('panel-login').classList.contains('active');
+      if (loginActive) handleLogin(); else handleRegister();
+    });
+  </script>
+</body>
+</html>
