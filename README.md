@@ -3,7 +3,7 @@
 E-commerce fullstack construido con Node.js, Express y PostgreSQL.
 
 ## Demo
-[shopapp-xxxx.onrender.com](https://shopapp-xxxx.onrender.com)
+https://shopapp-uuzm.onrender.com
 
 ## Stack
 - **Frontend**: HTML, CSS, JavaScript vanilla
