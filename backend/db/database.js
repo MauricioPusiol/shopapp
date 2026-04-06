@@ -11,45 +11,55 @@ if (process.env.DATABASE_URL) {
   });
 
   pool.query(`
-  CREATE TABLE IF NOT EXISTS users (
-    id         SERIAL PRIMARY KEY,
-    email      TEXT   NOT NULL UNIQUE,
-    password   TEXT   NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-  CREATE TABLE IF NOT EXISTS products (
-    id        SERIAL PRIMARY KEY,
-    name      TEXT    NOT NULL,
-    price     FLOAT   NOT NULL,
-    image_url TEXT,
-    stock     INTEGER DEFAULT 0,
-    category  TEXT
-  );
-  CREATE TABLE IF NOT EXISTS orders (
-    id         SERIAL PRIMARY KEY,
-    user_id    INTEGER NOT NULL REFERENCES users(id),
-    total      FLOAT   NOT NULL,
-    status     TEXT    DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-  CREATE TABLE IF NOT EXISTS order_items (
-    id         SERIAL PRIMARY KEY,
-    order_id   INTEGER NOT NULL REFERENCES orders(id),
-    product_id INTEGER NOT NULL REFERENCES products(id),
-    quantity   INTEGER NOT NULL,
-    price      FLOAT   NOT NULL
-  );
-`).catch(err => console.error('Error creando tablas:', err.message));
+    CREATE TABLE IF NOT EXISTS users (
+      id         SERIAL PRIMARY KEY,
+      email      TEXT   NOT NULL UNIQUE,
+      password   TEXT   NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS products (
+      id        SERIAL PRIMARY KEY,
+      name      TEXT    NOT NULL,
+      price     FLOAT   NOT NULL,
+      image_url TEXT,
+      stock     INTEGER DEFAULT 0,
+      category  TEXT
+    );
+    CREATE TABLE IF NOT EXISTS orders (
+      id         SERIAL PRIMARY KEY,
+      user_id    INTEGER NOT NULL REFERENCES users(id),
+      total      FLOAT   NOT NULL,
+      status     TEXT    DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS order_items (
+      id         SERIAL PRIMARY KEY,
+      order_id   INTEGER NOT NULL REFERENCES orders(id),
+      product_id INTEGER NOT NULL REFERENCES products(id),
+      quantity   INTEGER NOT NULL,
+      price      FLOAT   NOT NULL
+    );
+  `).catch(err => console.error('Error creando tablas:', err.message));
 
-  // Adaptador para que el resto del código funcione igual
- // Adaptador para que el resto del código funcione igual
+  // Parsea tipos numéricos que PostgreSQL devuelve como strings
+  const parseRow = (row) => {
+    if (!row) return row;
+    return {
+      ...row,
+      price:    row.price    !== undefined ? parseFloat(row.price)  : undefined,
+      total:    row.total    !== undefined ? parseFloat(row.total)   : undefined,
+      stock:    row.stock    !== undefined ? parseInt(row.stock)     : undefined,
+      quantity: row.quantity !== undefined ? parseInt(row.quantity)  : undefined,
+    };
+  };
+
   db = {
     prepare: (sql) => {
       let i = 0;
       const pgSql = sql.replace(/\?/g, () => `$${++i}`);
       return {
-        all: (...p) => pool.query(pgSql, p.flat()).then(r => r.rows),
-        get: (...p) => pool.query(pgSql, p.flat()).then(r => r.rows[0]),
+        all: (...p) => pool.query(pgSql, p.flat()).then(r => r.rows.map(parseRow)),
+        get: (...p) => pool.query(pgSql, p.flat()).then(r => parseRow(r.rows[0])),
         run: (...p) => pool.query(pgSql, p.flat()).then(r => ({
           lastInsertRowid: r.rows[0]?.id,
           changes: r.rowCount
