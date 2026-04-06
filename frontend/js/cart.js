@@ -6,7 +6,12 @@ function addToCart(product) {
   if (existing) {
     existing.quantity++;
   } else {
-    cart.push({ productId: product.id, name: product.name, price: product.price, quantity: 1 });
+    cart.push({
+      productId: product.id,
+      name:      product.name,
+      price:     parseFloat(product.price),  // ← parseFloat acá
+      quantity:  1
+    });
   }
 
   renderCart();
