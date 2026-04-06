@@ -11,35 +11,35 @@ if (process.env.DATABASE_URL) {
   });
 
   pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id         SERIAL PRIMARY KEY,
-      email      TEXT   NOT NULL UNIQUE,
-      password   TEXT   NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS products (
-      id        SERIAL PRIMARY KEY,
-      name      TEXT   NOT NULL,
-      price     REAL   NOT NULL,
-      image_url TEXT,
-      stock     INTEGER DEFAULT 0,
-      category  TEXT
-    );
-    CREATE TABLE IF NOT EXISTS orders (
-      id         SERIAL PRIMARY KEY,
-      user_id    INTEGER NOT NULL REFERENCES users(id),
-      total      REAL    NOT NULL,
-      status     TEXT    DEFAULT 'pending',
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS order_items (
-      id         SERIAL PRIMARY KEY,
-      order_id   INTEGER NOT NULL REFERENCES orders(id),
-      product_id INTEGER NOT NULL REFERENCES products(id),
-      quantity   INTEGER NOT NULL,
-      price      REAL    NOT NULL
-    );
-  `).catch(console.error);
+  CREATE TABLE IF NOT EXISTS users (
+    id         SERIAL PRIMARY KEY,
+    email      TEXT   NOT NULL UNIQUE,
+    password   TEXT   NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+  CREATE TABLE IF NOT EXISTS products (
+    id        SERIAL PRIMARY KEY,
+    name      TEXT    NOT NULL,
+    price     FLOAT   NOT NULL,
+    image_url TEXT,
+    stock     INTEGER DEFAULT 0,
+    category  TEXT
+  );
+  CREATE TABLE IF NOT EXISTS orders (
+    id         SERIAL PRIMARY KEY,
+    user_id    INTEGER NOT NULL REFERENCES users(id),
+    total      FLOAT   NOT NULL,
+    status     TEXT    DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+  CREATE TABLE IF NOT EXISTS order_items (
+    id         SERIAL PRIMARY KEY,
+    order_id   INTEGER NOT NULL REFERENCES orders(id),
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    quantity   INTEGER NOT NULL,
+    price      FLOAT   NOT NULL
+  );
+`).catch(err => console.error('Error creando tablas:', err.message));
 
   // Adaptador para que el resto del código funcione igual
   db = {
