@@ -20,15 +20,15 @@ router.post('/register', async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const stmt = db.prepare('INSERT INTO users (email, password) VALUES (?, ?) RETURNING id');
-    const result = stmt.run(email, hash);
+    const result = await stmt.run(email, hash);
 
     res.status(201).json({ message: 'Usuario creado', userId: result.lastInsertRowid });
 
   } catch (err) {
-    if (err.message.includes('UNIQUE constraint'))
+    if (err.message.includes('unique') || err.message.includes('UNIQUE'))
       return res.status(409).json({ error: 'El email ya está registrado' });
 
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -36,23 +36,28 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  try {
+    const user = await db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
-  if (!user)
-    return res.status(401).json({ error: 'Credenciales inválidas' });
+    if (!user)
+      return res.status(401).json({ error: 'Credenciales inválidas' });
 
-  const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password);
 
-  if (!match)
-    return res.status(401).json({ error: 'Credenciales inválidas' });
+    if (!match)
+      return res.status(401).json({ error: 'Credenciales inválidas' });
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email },
-    SECRET,
-    { expiresIn: '7d' }
-  );
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      SECRET,
+      { expiresIn: '7d' }
+    );
 
-  res.json({ token });
+    res.json({ token });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
