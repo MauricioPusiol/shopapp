@@ -15,4 +15,13 @@ router.get('/:id', (req, res) => {
   res.json(product);
 });
 
+// POST /api/products — agregar producto
+router.post('/', (req, res) => {
+  const { name, price, stock, category, image_url } = req.body;
+  const result = db.prepare(
+    'INSERT INTO products (name, price, stock, category, image_url) VALUES (?, ?, ?, ?, ?)'
+  ).run(name, price, stock, category, image_url || '');
+  res.status(201).json({ id: result.lastInsertRowid, name, price, stock, category });
+});
+
 module.exports = router;
