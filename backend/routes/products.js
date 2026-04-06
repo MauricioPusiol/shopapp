@@ -38,4 +38,17 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PATCH /api/products/:id — actualizar campos
+router.patch('/:id', async (req, res) => {
+  try {
+    const { name, price, stock, category, image_url } = req.body;
+    await db.prepare(
+      'UPDATE products SET name=?, price=?, stock=?, category=?, image_url=? WHERE id=?'
+    ).run(name, price, stock, category, image_url, req.params.id);
+    res.json({ message: 'Producto actualizado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
