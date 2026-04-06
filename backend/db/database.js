@@ -42,12 +42,20 @@ if (process.env.DATABASE_URL) {
 `).catch(err => console.error('Error creando tablas:', err.message));
 
   // Adaptador para que el resto del código funcione igual
+ // Adaptador para que el resto del código funcione igual
   db = {
-    prepare: (sql) => ({
-      all:    (...p) => pool.query(sql, p).then(r => r.rows),
-      get:    (...p) => pool.query(sql, p).then(r => r.rows[0]),
-      run:    (...p) => pool.query(sql, p).then(r => ({ lastInsertRowid: r.rows[0]?.id, changes: r.rowCount })),
-    }),
+    prepare: (sql) => {
+      let i = 0;
+      const pgSql = sql.replace(/\?/g, () => `$${++i}`);
+      return {
+        all: (...p) => pool.query(pgSql, p.flat()).then(r => r.rows),
+        get: (...p) => pool.query(pgSql, p.flat()).then(r => r.rows[0]),
+        run: (...p) => pool.query(pgSql, p.flat()).then(r => ({
+          lastInsertRowid: r.rows[0]?.id,
+          changes: r.rowCount
+        })),
+      };
+    },
     transaction: (fn) => async (...args) => {
       const client = await pool.connect();
       try {
