@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
 
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const stmt = db.prepare('INSERT INTO users (email, password) VALUES (?, ?)');
+    const stmt = db.prepare('INSERT INTO users (email, password) VALUES (?, ?) RETURNING id');
     const result = stmt.run(email, hash);
 
     res.status(201).json({ message: 'Usuario creado', userId: result.lastInsertRowid });

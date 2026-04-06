@@ -19,7 +19,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   const { name, price, stock, category, image_url } = req.body;
   const result = db.prepare(
-    'INSERT INTO products (name, price, stock, category, image_url) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO products (name, price, stock, category, image_url) VALUES (?, ?, ?, ?, ?) RETURNING id'
   ).run(name, price, stock, category, image_url || '');
   res.status(201).json({ id: result.lastInsertRowid, name, price, stock, category });
 });

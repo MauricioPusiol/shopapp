@@ -30,7 +30,7 @@ router.post('/', (req, res) => {
 
     // Crear la orden
     const orderResult = db.prepare(
-      'INSERT INTO orders (user_id, total) VALUES (?, ?)'
+      'INSERT INTO orders (user_id, total) VALUES (?, ?) RETURNING id'
     ).run(userId, total);
 
     const orderId = orderResult.lastInsertRowid;
