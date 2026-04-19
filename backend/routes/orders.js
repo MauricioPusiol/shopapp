@@ -52,12 +52,18 @@ router.post('/', async (req, res) => {
 // GET /api/orders/me — historial del usuario logueado
 router.get('/me', async (req, res) => {
   try {
-    // Primero traemos las órdenes
+    console.log('userId:', req.user.userId, typeof req.user.userId);
+
     const orders = await db.prepare(
       'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC'
     ).all(req.user.userId);
 
-    // Luego los items de cada orden por separado
+    console.log('orders tipo:', typeof orders, Array.isArray(orders), orders);
+
+    if (!Array.isArray(orders)) {
+      return res.status(500).json({ error: 'La DB no devolvió un array', raw: orders });
+    }
+
     const ordersWithItems = await Promise.all(
       orders.map(async (order) => {
         const items = await db.prepare(`
@@ -66,7 +72,6 @@ router.get('/me', async (req, res) => {
           JOIN products p ON p.id = oi.product_id
           WHERE oi.order_id = ?
         `).all(order.id);
-
         return { ...order, items };
       })
     );
@@ -78,5 +83,4 @@ router.get('/me', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 module.exports = router;
