@@ -24,5 +24,12 @@ if (process.env.NODE_ENV === 'production') {
     }).on('error', () => {});
   }, 14 * 60 * 1000);
 }
-
+// Para React Router — todas las rutas devuelven index.html
+const fs = require('fs');
+app.get('*', (req, res) => {
+  const indexPath = path.join(__dirname, '../frontend/index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  }
+});
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
