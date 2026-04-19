@@ -50,25 +50,33 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/orders/me — historial del usuario logueado
-router.get('/me', (req, res) => {
-  const orders = db.prepare(`
-    SELECT o.id, o.total, o.status, o.created_at,
-           json_group_array(json_object(
-             'product', p.name,
-             'quantity', oi.quantity,
-             'price', oi.price
-           )) AS items
-    FROM orders o
-    JOIN order_items oi ON oi.order_id = o.id
-    JOIN products p     ON p.id = oi.product_id
-    WHERE o.user_id = ?
-    GROUP BY o.id
-    ORDER BY o.created_at DESC
-  `).all(req.user.userId);
+router.get('/me', async (req, res) => {
+  try {
+    // Primero traemos las órdenes
+    const orders = await db.prepare(
+      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC'
+    ).all(req.user.userId);
 
-  // items viene como string JSON, hay que parsearlo
-  const parsed = orders.map(o => ({ ...o, items: JSON.parse(o.items) }));
-  res.json(parsed);
+    // Luego los items de cada orden por separado
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const items = await db.prepare(`
+          SELECT oi.quantity, oi.price, p.name AS product
+          FROM order_items oi
+          JOIN products p ON p.id = oi.product_id
+          WHERE oi.order_id = ?
+        `).all(order.id);
+
+        return { ...order, items };
+      })
+    );
+
+    res.json(ordersWithItems);
+
+  } catch (err) {
+    console.error('Error en GET /orders/me:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
