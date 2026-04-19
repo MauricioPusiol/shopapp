@@ -1,19 +1,20 @@
-async function loadProducts() {
-  const res      = await fetch('/api/products');
-  const products = await res.json();
-  renderProducts(products);
-}
-
-function renderProducts(products) {
-  const grid = document.getElementById('products-grid');
-  grid.innerHTML = products.map(p => `
-    <article class="product-card">
-      <h2>${p.name}</h2>
-      <p class="price">$${p.price.toFixed(2)}</p>
-      <p class="stock">Stock: ${p.stock}</p>
-      <button>Agregar al carrito</button>
-    </article>
-  `).join('');
+async function loadProducts(retries = 3) {
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const products = await res.json();
+    renderProducts(products);
+  } catch (err) {
+    if (retries > 0) {
+      console.log(`Reintentando... (${retries} intentos restantes)`);
+      document.getElementById('products-grid').innerHTML =
+        '<div class="state-msg">Conectando con el servidor...</div>';
+      setTimeout(() => loadProducts(retries - 1), 5000);
+    } else {
+      document.getElementById('products-grid').innerHTML =
+        '<div class="state-msg">No se pudo conectar. Recargá la página.</div>';
+    }
+  }
 }
 
 loadProducts();
