@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopApp — Mis órdenes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #0f0f0f;
+      --white:  #fafaf8;
+      --gray-1: #f4f3f0;
+      --gray-2: #e8e6e1;
+      --gray-3: #b0ada6;
+      --gray-4: #6b6860;
+      --green:  #1a7a4a;
+      --green-bg: #edf7f2;
+      --radius: 2px;
+      --transition: 200ms ease;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--black);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--gray-2);
+      position: sticky;
+      top: 0;
+      background: var(--white);
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      color: var(--black);
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    .nav-link {
+      font-size: 13px;
+      color: var(--gray-4);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .nav-link:hover { color: var(--black); }
+    .nav-link.active { color: var(--black); font-weight: 500; }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--gray-2);
+      padding: 7px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--gray-4);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-logout:hover { border-color: var(--black); color: var(--black); }
+
+    /* HERO */
+    .hero {
+      padding: 56px 48px 40px;
+      border-bottom: 1px solid var(--gray-2);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 em { font-style: italic; color: var(--gray-3); }
+
+    .hero p { font-size: 15px; color: var(--gray-4); font-weight: 300; }
+
+    .hero-stat {
+      text-align: right;
+    }
+
+    .hero-stat .num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 48px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .hero-stat .label {
+      font-size: 13px;
+      color: var(--gray-3);
+      margin-top: 4px;
+    }
+
+    /* CONTENIDO */
+    .content { padding: 40px 48px; max-width: 860px; }
+
+    /* Estado vacío */
+    .empty-state {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--gray-4);
+    }
+
+    .empty-state p { font-size: 14px; color: var(--gray-3); margin-bottom: 24px; }
+
+    .btn-shop {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--black);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      transition: opacity var(--transition);
+    }
+    .btn-shop:hover { opacity: 0.8; }
+
+    /* ORDEN CARD */
+    .order-card {
+      border: 1px solid var(--gray-2);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+      animation: fadeUp 300ms ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card:nth-child(1) { animation-delay: 0ms; }
+    .order-card:nth-child(2) { animation-delay: 60ms; }
+    .order-card:nth-child(3) { animation-delay: 120ms; }
+    .order-card:nth-child(4) { animation-delay: 180ms; }
+    .order-card:nth-child(5) { animation-delay: 240ms; }
+
+    .order-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: var(--gray-1);
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--transition);
+    }
+    .order-head:hover { background: var(--gray-2); }
+
+    .order-meta { display: flex; align-items: center; gap: 20px; }
+
+    .order-id {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .order-date { font-size: 13px; color: var(--gray-3); }
+
+    .order-right { display: flex; align-items: center; gap: 16px; }
+
+    .order-total {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .order-status {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 40px;
+    }
+
+    .status-pending  { background: #fef9ec; color: #92610a; border: 1px solid #f5dfa0; }
+    .status-complete { background: var(--green-bg); color: var(--green); border: 1px solid #b8e4cc; }
+    .status-cancelled{ background: #fdf0ee; color: #c0392b; border: 1px solid #f5c6c0; }
+
+    .order-chevron {
+      font-size: 12px;
+      color: var(--gray-3);
+      transition: transform var(--transition);
+    }
+    .order-card.open .order-chevron { transform: rotate(180deg); }
+
+    /* Items de la orden */
+    .order-body {
+      display: none;
+      border-top: 1px solid var(--gray-2);
+    }
+    .order-card.open .order-body { display: block; }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--gray-1);
+    }
+    .order-item:last-child { border-bottom: none; }
+
+    .oi-num {
+      width: 28px; height: 28px;
+      background: var(--gray-1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-4);
+      flex-shrink: 0;
+    }
+
+    .oi-info { flex: 1; }
+
+    .oi-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+
+    .oi-qty { font-size: 12px; color: var(--gray-3); }
+
+    .oi-price {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .order-foot {
+      display: flex;
+      justify-content: flex-end;
+      padding: 16px 24px;
+      background: var(--gray-1);
+      border-top: 1px solid var(--gray-2);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .order-foot .label { font-size: 13px; color: var(--gray-4); }
+
+    .order-foot .total-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    /* Loading */
+    .loading {
+      padding: 60px 0;
+      text-align: center;
+      color: var(--gray-3);
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      nav, .hero, .content { padding-left: 20px; padding-right: 20px; }
+      .hero { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .hero h1 { font-size: 36px; }
+      .hero-stat { text-align: left; }
+      .order-meta { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-brand" href="/">ShopApp</a>
+    <div class="nav-right">
+      <a class="nav-link" href="/index.html">Catálogo</a>
+      <a class="nav-link active" href="/orders.html">Mis órdenes</a>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Mis <em>órdenes</em></h1>
+      <p>Historial completo de tus compras.</p>
+    </div>
+    <div class="hero-stat">
+      <div class="num" id="orders-count">—</div>
+      <div class="label">compras realizadas</div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+    <div id="orders-container">
+      <div class="loading">Cargando órdenes...</div>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      if (!token) return window.location.href = '/login.html';
+      loadOrders();
+    });
+
+    async function loadOrders() {
+      const container = document.getElementById('orders-container');
+
+      try {
+        const res = await authFetch('/api/orders/me');
+
+        if (!res.ok) {
+          if (res.status === 401) return window.location.href = '/login.html';
+          throw new Error('Error al cargar las órdenes');
+        }
+
+        const orders = await res.json();
+
+        document.getElementById('orders-count').textContent = orders.length;
+
+        if (orders.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">&#128722;</div>
+              <h2>Todavía no compraste nada</h2>
+              <p>Explorá el catálogo y hacé tu primera compra.</p>
+              <a class="btn-shop" href="/index.html">Ver catálogo</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = orders.map((order, idx) => {
+          const items   = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+          const date    = new Date(order.created_at).toLocaleDateString('es-AR', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+          const statusClass = `status-${order.status || 'pending'}`;
+          const statusLabel = { pending: 'Pendiente', complete: 'Completada', cancelled: 'Cancelada' }[order.status] || 'Pendiente';
+
+          return `
+            <div class="order-card" id="order-${order.id}">
+              <div class="order-head" onclick="toggleOrder('order-${order.id}')">
+                <div class="order-meta">
+                  <span class="order-id">Orden #${order.id}</span>
+                  <span class="order-date">${date}</span>
+                </div>
+                <div class="order-right">
+                  <span class="order-total">$${parseFloat(order.total).toFixed(2)}</span>
+                  <span class="order-status ${statusClass}">${statusLabel}</span>
+                  <span class="order-chevron">&#9660;</span>
+                </div>
+              </div>
+              <div class="order-body">
+                ${items.map((item, i) => `
+                  <div class="order-item">
+                    <div class="oi-num">${i + 1}</div>
+                    <div class="oi-info">
+                      <div class="oi-name">${item.product}</div>
+                      <div class="oi-qty">Cantidad: ${item.quantity}</div>
+                    </div>
+                    <div class="oi-price">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</div>
+                  </div>
+                `).join('')}
+                <div class="order-foot">
+                  <span class="label">Total de la orden</span>
+                  <span class="total-amount">$${parseFloat(order.total).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Abrir la primera orden automáticamente
+        if (orders.length > 0) {
+          toggleOrder(`order-${orders[0].id}`);
+        }
+
+      } catch (err) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">&#9888;</div>
+            <h2>No se pudieron cargar las órdenes</h2>
+            <p>${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function toggleOrder(id) {
+      const card = document.getElementById(id);
+      card.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
